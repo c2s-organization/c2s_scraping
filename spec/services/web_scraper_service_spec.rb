@@ -7,14 +7,14 @@ RSpec.describe WebScraperService do
     allow(URI).to receive(:open).and_return(html)
   end
 
-  it 'extrai corretamente o ano do veículo' do
+  it 'extrai corretamente o marca do veículo' do
     result = WebScraperService.scrape('https://www.webmotors.com.br/comprar/peugeot/208/16-griffe-16v-flex-4p-automatico/4-portas/2020/52049140?pos=a52049140g:&np=1&ct=1840177')
-    expect(result[:year]).to eq('2020/2020')
+    expect(result[:make]).to eq('PEUGEOT')
   end
 
-  it 'extrai corretamente a quilometragem do veículo' do
+  it 'extrai corretamente o modelo do veículo' do
     result = WebScraperService.scrape('https://www.webmotors.com.br/comprar/peugeot/208/16-griffe-16v-flex-4p-automatico/4-portas/2020/52049140?pos=a52049140g:&np=1&ct=1840177')
-    expect(result[:kilometrage]).to eq('67.000')
+    expect(result[:model]).to eq('208')
   end
 
   it 'extrai corretamente o preço do veículo' do
