@@ -5,7 +5,7 @@ class NotifyService
 
   def self.call(title, body)
     # TODO: Mover para HabbitMQ
-    body = { title: title, body: body }.to_json
+    body = { title: title, body: body }
 
     HTTParty.post(NOTIFICATION_URL, body: body.to_json, headers: { 'Content-Type' => 'application/json' })
   end
