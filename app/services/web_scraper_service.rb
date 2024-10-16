@@ -7,12 +7,16 @@ class WebScraperService
   NOTIFICATION_URL = 'http://localhost:3002/notifications'
 
   def self.scrape(url)
-    page = Nokogiri::HTML(URI.open(url))
+    agent = Mechanize.new
+    agent.user_agent_alias = 'Windows Chrome'
+    page = agent.get(url)
 
-    make = page.at_css('h1#VehicleBasicInformationTitle').children[0].text.strip
-    model = page.at_css('h1#VehicleBasicInformationTitle strong').text.strip
-    price = page.at_css('strong#vehicleSendProposalPrice').text.strip
-    title = page.at_css('h1#VehicleBasicInformationTitle').text.strip
+    document = Nokogiri::HTML(page.body)
+
+    make = document.css('#VehicleBasicInformationTitle').text.split.first
+    model = document.css('h1#VehicleBasicInformationTitle strong').text
+    price = document.css('#vehicleSendProposalPrice').text
+    title = document.css('VehicleBasicInformationTitle').text.strip
 
     data = { make: make, model: model, price: price, title: title }
 
