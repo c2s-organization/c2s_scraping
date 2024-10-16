@@ -113,6 +113,8 @@ GEM
     irb (1.14.1)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    json-schema (5.0.1)
+      addressable (~> 2.8)
     logger (1.6.1)
     loofah (2.22.0)
       crass (~> 1.0.2)
@@ -142,6 +144,7 @@ GEM
       mime-types-data (~> 3.2015)
     mime-types-data (3.2024.1001)
     mini_mime (1.1.5)
+    mini_portile2 (2.8.7)
     minitest (5.25.1)
     msgpack (1.7.3)
     multi_xml (0.6.0)
@@ -159,6 +162,9 @@ GEM
       net-protocol
     nio4r (2.7.3)
     nkf (0.2.0)
+    nokogiri (1.15.6)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.15.6-x86_64-linux)
       racc (~> 1.4)
     pg (1.5.8)
@@ -223,6 +229,21 @@ GEM
       rspec-mocks (~> 3.10)
       rspec-support (~> 3.10)
     rspec-support (3.13.1)
+    rswag (2.15.0)
+      rswag-api (= 2.15.0)
+      rswag-specs (= 2.15.0)
+      rswag-ui (= 2.15.0)
+    rswag-api (2.15.0)
+      activesupport (>= 5.2, < 8.0)
+      railties (>= 5.2, < 8.0)
+    rswag-specs (2.15.0)
+      activesupport (>= 5.2, < 8.0)
+      json-schema (>= 2.2, < 6.0)
+      railties (>= 5.2, < 8.0)
+      rspec-core (>= 2.14)
+    rswag-ui (2.15.0)
+      actionpack (>= 5.2, < 8.0)
+      railties (>= 5.2, < 8.0)
     rubyntlm (0.6.5)
       base64
     rubyzip (2.3.2)
@@ -253,6 +274,7 @@ GEM
     zeitwerk (2.6.18)
 
 PLATFORMS
+  ruby
   x86_64-linux
 
 DEPENDENCIES
@@ -268,6 +290,7 @@ DEPENDENCIES
   puma (~> 5.0)
   rails (~> 7.0.8, >= 7.0.8.4)
   rspec-rails (~> 5.0.0)
+  rswag (~> 2.5)
   selenium-webdriver
   shoulda-matchers
   tzinfo-data

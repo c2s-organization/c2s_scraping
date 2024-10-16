@@ -1,0 +1,56 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "API V1",
+    "version": "v1"
+  },
+  "paths": {
+    "/scrapings": {
+      "post": {
+        "summary": "Creates a Scraping Task",
+        "tags": [
+          "Scrapings"
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "201": {
+            "description": "Scraping task created successfully"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrapeCarCreate"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ScrapeCarCreate": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "url"
+        ]
+      }
+    }
+  }
+}

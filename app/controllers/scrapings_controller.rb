@@ -7,6 +7,8 @@ class ScrapingsController < ApplicationController
       WebScraperService.scrape(@scrape_car)
 
       render json: @scrape_car, status: :created
+    else
+      render json: { errors: @scrape_car.errors.full_messages }, status: :unprocessable_entity
     end
   end
 end

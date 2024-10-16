@@ -1,4 +1,6 @@
 class ScrapeCar < ApplicationRecord
 
-  validates_presence_of :task_id, :url
+  validates :task_id, presence: true
+  validates :url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid Url" }
+
 end
