@@ -26,6 +26,7 @@ class WebScraperService
   end
 
   def self.notify_microservice(title, body)
+    # TODO: Mover para service, depois pra HabbitMQ
     uri = URI.parse(NOTIFICATION_URL)
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Post.new(uri.path, { 'Content-Type' => 'application/json' })
