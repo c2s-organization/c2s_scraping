@@ -1,0 +1,2 @@
+class ScrapeCar < ApplicationRecord
+end
