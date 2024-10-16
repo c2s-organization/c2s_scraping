@@ -1,30 +1,54 @@
 require 'rails_helper'
 
 RSpec.describe WebScraperService do
+  let(:scrape_car) { double('ScrapeCar', task_id: 1, url: Rails.root.join('spec/fixtures/webmotors_page.html').to_s) }
+  let(:mock_driver) { instance_double(Selenium::WebDriver::Driver) }
+  let(:mock_element) { instance_double(Selenium::WebDriver::Element) }
+  let(:mock_wait) { instance_double(Selenium::WebDriver::Wait) }
+  let(:page_source) { File.read(Rails.root.join('spec/fixtures/webmotors_page.html')) }
 
   before do
-    # TODO: Acesso ao site original
-    allow(NotifyService).to receive(:call).and_return(true)
+    allow(Selenium::WebDriver::Firefox::Options).to receive(:new).and_return(double(add_argument: true))
+    allow(Selenium::WebDriver).to receive(:for).and_return(mock_driver)
+    allow(mock_driver).to receive(:navigate).and_return(double(to: true))
+    allow(mock_driver).to receive(:page_source).and_return(page_source)
+    allow(mock_driver).to receive(:quit)
+
+    allow(Selenium::WebDriver::Wait).to receive(:new).and_return(mock_wait)
+    allow(mock_wait).to receive(:until).and_return(mock_element)
+
+    allow(mock_element).to receive(:find_element).and_return(mock_element)
+    allow(mock_element).to receive(:text).and_return('CHEVROLET')
+
+    allow(NotifyService).to receive(:call)
+    allow(TaskService).to receive(:call)
   end
 
-  it 'extrai corretamente o marca do veículo' do
-    result = WebScraperService.scrape('https://www.webmotors.com.br/comprar/peugeot/208/16-griffe-16v-flex-4p-automatico/4-portas/2020/52049140?pos=a52049140g:&np=1&ct=1840177')
-    expect(result[:make]).to eq('PEUGEOT')
-    expect(result[:model]).to eq('208')
-    expect(result[:price]).to eq('R$ 70.990')
-  end
+  describe '.scrape' do
+    context 'when scraping is successful' do
+      it 'calls NotifyService and TaskService with the correct data' do
+        result = WebScraperService.scrape(scrape_car)
 
-  it 'extrai corretamente o modelo do veículo' do
-    result = WebScraperService.scrape('https://www.webmotors.com.br/comprar/byd/king/15-dm-i-phev-gs-automatico/4-portas/2024-2025/53987515?pos=b53987515m:&np=1')
-    expect(result[:make]).to eq('BYD')
-    expect(result[:model]).to eq('KING')
-    expect(result[:price]).to eq('R$ 277.800')
-  end
+        expect(result[:make]).to eq('PEUGEOT')
+        expect(result[:model]).to eq('208')
+        expect(result[:price]).to eq('R$ 70.990')
+        expect(result[:title]).to eq('PEUGEOT, 208, R$ 70.990, 1.6 GRIFFE 16V FLEX 4P AUTOMÁTICO')
 
-  it 'extrai corretamente o preço do veículo' do
-    result = WebScraperService.scrape('https://www.webmotors.com.br/comprar/mclaren/750s/40-v8-turbo-gasolina-spider-ssg/2-portas/2024/53972021?pos=a53972021g:&np=1')
-    expect(result[:make]).to eq('MCLAREN')
-    expect(result[:model]).to eq('750S')
-    expect(result[:price]).to eq('R$ 4.500.000')
+        expect(NotifyService).to have_received(:call).with("PEUGEOT, 208, R$ 70.990, 1.6 GRIFFE 16V FLEX 4P AUTOMÁTICO", "R$ 70.990")
+        expect(TaskService).to have_received(:call).with(scrape_car.task_id, 'completed', result)
+      end
+    end
+
+    context 'when scraping fails' do
+      before do
+        allow(mock_driver).to receive(:page_source).and_raise(StandardError.new('Error scraping page'))
+      end
+
+      it 'calls TaskService with failed status' do
+        WebScraperService.scrape(scrape_car)
+
+        expect(TaskService).to have_received(:call).with(scrape_car.task_id, 'failed')
+      end
+    end
   end
 end
