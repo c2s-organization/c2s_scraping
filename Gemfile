@@ -25,11 +25,9 @@ gem "puma", "~> 5.0"
 # gem "bcrypt", "~> 3.1.7"
 gem 'nokogiri'
 gem 'mechanize'
-gem 'webmock'
 gem 'watir'
 gem 'selenium-webdriver'
 gem 'httparty'
-gem 'shoulda-matchers'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
@@ -50,6 +48,8 @@ group :development, :test do
   gem 'factory_bot_rails'
   gem 'faker'
   gem 'database_cleaner-active_record'
+  gem 'shoulda-matchers'
+  gem 'webmock'
 end
 
 group :development do
