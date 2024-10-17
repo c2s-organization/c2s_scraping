@@ -1,6 +1,6 @@
 class TaskService
   require 'httparty'
-  NOTIFICATION_URL = 'http://localhost:3000/api/scrapings'
+  NOTIFICATION_URL = "#{ENV["URL_MS_TASK"]}/api/scrapings"
 
   def self.call(task_id, status, scraped_data = nil)
     # TODO: Mover para HabbitMQ

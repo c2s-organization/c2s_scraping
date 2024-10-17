@@ -1,7 +1,7 @@
 class NotifyService
   require 'httparty'
 
-  NOTIFICATION_URL = 'http://localhost:3002/notifications'
+  NOTIFICATION_URL = "#{ENV["URL_MS_NOTIFICATION"]}/notifications"
 
   def self.call(title, body)
     # TODO: Mover para HabbitMQ
