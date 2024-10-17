@@ -7,7 +7,7 @@ class TaskService
 
     HTTParty.put("#{NOTIFICATION_URL}/#{task_id}", body: body.to_json, headers: { 'Content-Type' => 'application/json' })
 
-    NotifyService.call("Task sent", "Task #{task_id} was #{status}")
+    NotifyJob.perform_later("Task sent", "Task #{task_id} was #{status}")
   end
 
 end
