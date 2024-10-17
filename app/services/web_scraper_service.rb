@@ -5,7 +5,6 @@ class WebScraperService
   SELENIUM_WAIT_TIMEOUT = 20
   FIREFOX_OPTIONS = '--disable-blink-features=AutomationControlled'
 
-
   def self.scrape(scrape_car)
     NotifyService.call("Scrape started", "Scraping task: #{scrape_car.task_id} with url: #{scrape_car.url}")
     driver = initialize_driver
@@ -66,7 +65,8 @@ class WebScraperService
   end
 
   def self.notify_services(scrape_car, data)
-    TaskService.call(scrape_car.task_id, "completed", data)
+    friendly_message = "O carro que você está visualizando é um <b>#{data[:make]} #{data[:model]}</b> com o preço de <b>#{data[:price]}</b>. O modelo completo é: <b>#{data[:title]}</b>."
+    TaskService.call(scrape_car.task_id, "completed", friendly_message)
     NotifyService.call("Scrape completed", "Scraping task: #{scrape_car.task_id} with url: #{scrape_car.url}")
   end
 
