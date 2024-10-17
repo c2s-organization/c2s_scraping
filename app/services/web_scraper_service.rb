@@ -2,7 +2,7 @@ require 'nokogiri'
 require 'selenium-webdriver'
 
 class WebScraperService
-  SELENIUM_WAIT_TIMEOUT = 10
+  SELENIUM_WAIT_TIMEOUT = 20
   FIREFOX_OPTIONS = '--disable-blink-features=AutomationControlled'
 
   def self.scrape(scrape_car)
@@ -15,7 +15,7 @@ class WebScraperService
     notify_services(scrape_car, data)
 
     data
-  rescue StandardError => e
+  rescue => e
     handle_error(scrape_car, e)
   ensure
     driver&.quit
@@ -25,7 +25,10 @@ class WebScraperService
 
   def self.initialize_driver
     options = Selenium::WebDriver::Firefox::Options.new
-    options.add_argument(FIREFOX_OPTIONS)
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument('--headless') # Isso garante que o Firefox rode sem uma interface gráfica
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
     Selenium::WebDriver.for(:firefox, options: options)
   end
 
