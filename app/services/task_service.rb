@@ -6,6 +6,8 @@ class TaskService
     body = { task_id: task_id, status: status, scraped_data: scraped_data }
 
     HTTParty.put("#{NOTIFICATION_URL}/#{task_id}", body: body.to_json, headers: { 'Content-Type' => 'application/json' })
+
+    NotifyService.call("Task sent", "Task #{task_id} was #{status}")
   end
 
 end

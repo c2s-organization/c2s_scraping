@@ -5,9 +5,11 @@ class WebScraperService
   SELENIUM_WAIT_TIMEOUT = 20
   FIREFOX_OPTIONS = '--disable-blink-features=AutomationControlled'
 
+
   def self.scrape(scrape_car)
+    NotifyService.call("Scrape started", "Scraping task: #{scrape_car.task_id} with url: #{scrape_car.url}")
     driver = initialize_driver
-    load_page(driver, scrape_car.url)
+    load_page(driver, scrape_car)
 
     document = parse_page_source(driver.page_source)
 
@@ -15,6 +17,10 @@ class WebScraperService
     notify_services(scrape_car, data)
 
     data
+  rescue Selenium::WebDriver::Error::TimeoutError => e
+    handle_error(scrape_car, e)
+  rescue Selenium::WebDriver::Error::NoSuchElementError => e
+    handle_error(scrape_car, e)
   rescue => e
     handle_error(scrape_car, e)
   ensure
@@ -26,14 +32,17 @@ class WebScraperService
   def self.initialize_driver
     options = Selenium::WebDriver::Firefox::Options.new
     options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_argument('--headless') # Isso garante que o Firefox rode sem uma interface gráfica
+    options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     Selenium::WebDriver.for(:firefox, options: options)
   end
 
-  def self.load_page(driver, url)
-    driver.navigate.to(url)
+  def self.load_page(driver, scrape_car)
+    delay = rand(1..3)
+    NotifyService.call("Scrape processing", "Scraping task: #{scrape_car.task_id} with url: #{scrape_car.url} in #{delay} seconds")
+    sleep(delay)
+    driver.navigate.to(scrape_car.url)
     wait = Selenium::WebDriver::Wait.new(timeout: SELENIUM_WAIT_TIMEOUT)
     wait.until { driver.find_element(css: 'h1#VehicleBasicInformationTitle') }
   end
@@ -57,12 +66,13 @@ class WebScraperService
   end
 
   def self.notify_services(scrape_car, data)
-    NotifyService.call(data[:title], data[:price])
     TaskService.call(scrape_car.task_id, "completed", data)
+    NotifyService.call("Scrape completed", "Scraping task: #{scrape_car.task_id} with url: #{scrape_car.url}")
   end
 
   def self.handle_error(scrape_car, error)
     TaskService.call(scrape_car.task_id, "failed")
-    Rails.logger.error("Web scraping failed for task #{scrape_car.task_id}: #{error.message}")
+    NotifyService.call("Scrape failed", "Scraping task: #{scrape_car.task_id} with url: #{scrape_car.url}")
+    NotifyService.call("Scrape failed", "Scraping task: #{scrape_car.task_id} with error: #{error.message}")
   end
 end
