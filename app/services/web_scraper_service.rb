@@ -66,12 +66,12 @@ class WebScraperService
 
   def self.notify_services(scrape_car, data)
     friendly_message = "O carro que você está visualizando é um <b>#{data[:make]} #{data[:model]}</b> com o preço de <b>#{data[:price]}</b>. O modelo completo é: <b>#{data[:title]}</b>."
-    TaskService.call(scrape_car.task_id, "completed", friendly_message)
+    TaskJob.perform_later(scrape_car.task_id, "completed", friendly_message)
     NotifyJob.perform_later("Scrape completed", "Scraping task: #{scrape_car.task_id} with url: #{scrape_car.url}")
   end
 
   def self.handle_error(scrape_car, error)
-    TaskService.call(scrape_car.task_id, "failed")
+    TaskJob.perform_later(scrape_car.task_id, "failed")
     NotifyJob.perform_later("Scrape failed", "Scraping task: #{scrape_car.task_id} with url: #{scrape_car.url}")
     NotifyJob.perform_later("Scrape failed", "Scraping task: #{scrape_car.task_id} with error: #{error.message}")
   end
