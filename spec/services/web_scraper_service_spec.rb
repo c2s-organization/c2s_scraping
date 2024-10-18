@@ -1,53 +1,53 @@
 require 'rails_helper'
+require 'nokogiri'
+require 'selenium-webdriver'
 
 RSpec.describe WebScraperService do
-  let(:scrape_car) { double('ScrapeCar', task_id: 1, url: Rails.root.join('spec/fixtures/webmotors_page.html').to_s) }
-  let(:mock_driver) { instance_double(Selenium::WebDriver::Driver) }
-  let(:mock_element) { instance_double(Selenium::WebDriver::Element) }
-  let(:mock_wait) { instance_double(Selenium::WebDriver::Wait) }
-  let(:page_source) { File.read(Rails.root.join('spec/fixtures/webmotors_page.html')) }
+  let(:scrape_car) { double("ScrapeCar", task_id: 1, url: "http://example.com") }
+  let(:driver) { instance_double(Selenium::WebDriver::Driver) }
+  let(:navigate) { instance_double(Selenium::WebDriver::Navigation) }
+  let(:wait) { instance_double(Selenium::WebDriver::Wait) }
+  let(:document) { Nokogiri::HTML('<html><h1 id="VehicleBasicInformationTitle">Ford <strong>Mustang</strong> <span>2020</span></h1><div id="vehicleSendProposalPrice">$30,000</div></html>') }
+  let(:page_source) { document.to_html }
 
   before do
-    allow(Selenium::WebDriver::Firefox::Options).to receive(:new).and_return(double(add_argument: true))
-    allow(Selenium::WebDriver).to receive(:for).and_return(mock_driver)
-    allow(mock_driver).to receive(:navigate).and_return(double(to: true))
-    allow(mock_driver).to receive(:page_source).and_return(page_source)
-    allow(mock_driver).to receive(:quit)
-
-    allow(Selenium::WebDriver::Wait).to receive(:new).and_return(mock_wait)
-    allow(mock_wait).to receive(:until).and_return(mock_element)
-
-    allow(mock_element).to receive(:find_element).and_return(mock_element)
-    allow(mock_element).to receive(:text).and_return('CHEVROLET')
-
-    allow(NotifyService).to receive(:call)
-    allow(TaskService).to receive(:call)
+    allow(Selenium::WebDriver).to receive(:for).and_return(driver)
+    allow(driver).to receive(:navigate).and_return(navigate)
+    allow(driver).to receive(:page_source).and_return(page_source)
+    allow(driver).to receive(:quit)
+    allow(navigate).to receive(:to).with(scrape_car.url)
+    allow(Selenium::WebDriver::Wait).to receive(:new).and_return(wait)
+    allow(wait).to receive(:until)
+    allow(NotifyJob).to receive(:perform_later)
+    allow(TaskJob).to receive(:perform_later)
+    allow(WebScraperService).to receive(:sleep)
   end
 
   describe '.scrape' do
-    context 'when scraping is successful' do
-      it 'calls NotifyService and TaskService with the correct data' do
+    context 'when the page loads successfully' do
+      it 'calls the NotifyJob and TaskJob with the correct arguments' do
         result = WebScraperService.scrape(scrape_car)
 
-        expect(result[:make]).to eq('PEUGEOT')
-        expect(result[:model]).to eq('208')
-        expect(result[:price]).to eq('R$ 70.990')
-        expect(result[:title]).to eq('PEUGEOT, 208, R$ 70.990, 1.6 GRIFFE 16V FLEX 4P AUTOMÁTICO')
+        expect(NotifyJob).to have_received(:perform_later).with("Scrape started", "Scraping task: 1 with url: http://example.com").ordered
+        expect(NotifyJob).to have_received(:perform_later).with("Scrape completed", "Scraping task: 1 with url: http://example.com").ordered
+        expect(TaskJob).to have_received(:perform_later).with(1, "completed", /Ford Mustang/)
 
-        expect(NotifyService).to have_received(:call).with("PEUGEOT, 208, R$ 70.990, 1.6 GRIFFE 16V FLEX 4P AUTOMÁTICO", "R$ 70.990")
-        expect(TaskService).to have_received(:call).with(scrape_car.task_id, 'completed', result)
+        expect(result[:make]).to eq("Ford")
+        expect(result[:model]).to eq("Mustang")
+        expect(result[:price]).to eq("$30,000")
       end
     end
 
-    context 'when scraping fails' do
-      before do
-        allow(mock_driver).to receive(:page_source).and_raise(StandardError.new('Error scraping page'))
-      end
+    context 'when a timeout error occurs' do
+      it 'handles the error and calls NotifyJob and TaskJob with failure' do
+        allow(wait).to receive(:until).and_raise(Selenium::WebDriver::Error::TimeoutError)
 
-      it 'calls TaskService with failed status' do
-        WebScraperService.scrape(scrape_car)
+        expect {
+          WebScraperService.scrape(scrape_car)
+        }.not_to raise_error
 
-        expect(TaskService).to have_received(:call).with(scrape_car.task_id, 'failed')
+        expect(NotifyJob).to have_received(:perform_later).with("Scrape failed", "Scraping task: 1 with url: http://example.com")
+        expect(TaskJob).to have_received(:perform_later).with(1, "failed")
       end
     end
   end

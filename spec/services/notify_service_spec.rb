@@ -1,11 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe NotifyService do
+  include ActiveJob::TestHelper
+
   let(:title) { 'Test Notification' }
   let(:body) { 'This is a test notification body.' }
   let(:notification_url) { NotifyService::NOTIFICATION_URL }
   let(:headers) { { 'Content-Type' => 'application/json' } }
-  let(:body_data) { { title: title, body: body }.to_json }
+  let(:body_data) { { title: "Scraping: Test Notification", body: body }.to_json }
   let(:response) { instance_double(HTTParty::Response) }
 
   describe '.call' do

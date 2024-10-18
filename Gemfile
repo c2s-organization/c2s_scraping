@@ -50,6 +50,7 @@ group :development, :test do
   gem 'faker'
   gem 'database_cleaner-active_record'
   gem 'shoulda-matchers'
+  gem 'simplecov'
   gem 'webmock'
   gem 'rswag', '~> 2.5'
 end

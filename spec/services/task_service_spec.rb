@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe TaskService do
+  include ActiveJob::TestHelper
+
   let(:task_id) { 1 }
   let(:status) { 'completed' }
   let(:scraped_data) { { make: 'Ford', model: 'Fiesta' } }
