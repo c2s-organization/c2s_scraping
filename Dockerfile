@@ -36,12 +36,9 @@ RUN bundle install
 # Copiar o código da aplicação
 COPY . /app
 
-# Copiar o script de entrada
-COPY docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
-RUN chmod +x /usr/bin/docker-entrypoint.sh
+COPY entrypoint.sh /usr/bin/
 
-# Definir o script de entrada
-ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
+RUN chmod +x /usr/bin/entrypoint.sh
 
 # Expor a porta que o Rails utilizará
 EXPOSE 3003

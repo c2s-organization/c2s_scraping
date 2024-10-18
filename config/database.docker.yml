@@ -9,12 +9,12 @@ default: &default
 
 development:
   <<: *default
-  database: myapp_development
+  database: c2s_scraping_development
 
 test:
   <<: *default
-  database: myapp_test
+  database: c2s_scraping_test
 
 production:
   <<: *default
-  database: myapp_production
+  database: c2s_scraping_production
